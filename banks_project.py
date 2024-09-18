@@ -69,3 +69,42 @@ def run_query(query_statement, sql_connection):
     print(query_statement)
     query_output = pd.read_sql(query_statement, sql_connection)
     print(query_output)
+
+# extração, transformação, armazenamento e consulta dos dados via banco de dados    
+
+log_progress('Preliminaries complete. Initiating ETL process')
+
+df = extract(url, table_attribs)
+
+log_progress('Data extraction complete. Initiating Transformation process')
+
+df = transform(df)
+
+log_progress('Data transformation complete. Initiating loading process')
+
+load_to_csv(df, csv_path)
+
+log_progress('Data saved to CSV file')
+
+sql_connection = sqlite3.connect(db_name)
+
+log_progress('SQL Connection initiated.')
+
+load_to_db(df, sql_connection, table_name)
+
+log_progress('Data loaded to Database as table. Executing queries')
+
+query_statement = f"SELECT * FROM Largest_banks"
+run_query(query_statement, sql_connection)
+
+query_statement = f"SELECT AVG(MC_GBP_Billion) FROM Largest_banks"
+run_query(query_statement, sql_connection)
+
+query_statement = f"SELECT Name from Largest_banks LIMIT 5"
+run_query(query_statement, sql_connection)
+
+log_progress('Process Complete.')
+
+sql_connection.close()
+
+log_progress('Server Connection closed')
