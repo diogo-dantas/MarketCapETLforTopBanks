@@ -48,4 +48,20 @@ def extract(url, table_attribs):
 
     return df
 
-    
+def transform(df):
+    exchange_df = pd.read_csv(csv_path) # le a taxa de câmbio do arquivo csv
+    exchange_rate = exchange_df.set_index('Currency').to_dict()['Rate'] # converte em dicionário 
+    exchange_rate = {k: float(v) for k, v in exchange_rate.items()} # cast valores para type float
+
+    #converte os valores de acordo com a taxa de câmbio
+    df['MC_GBP_Billion'] = [np.round(x*exchange_rate['GBP'],2) for x in df['MC_USD_Billion']]
+    df['MC_EUR_Billion'] = [np.round(x*exchange_rate['EUR'],2) for x in df['MC_USD_Billion']]
+    df['MC_INR_Billion'] = [np.round(x*exchange_rate['INR'],2) for x in df['MC_USD_Billion']]
+    return df
+
+def load_to_csv(df, csv_path): #armazena o dataframe em csv
+    df.to_csv('./Largest_banks_data.csv')
+
+def load_to_db(df, sql_connection, table_name): #armazena os dados no banco de dados
+    df.to_sql(table_name, sql_connection, if_exists='replace', index=False)
+
